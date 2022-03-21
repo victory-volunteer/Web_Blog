@@ -1,0 +1,14 @@
+{% extends 'base_mistake.html' %}
+{% load staticfiles %}
+{% block title %}404{% endblock %}
+{% block class_name %}bg404 errorpage{% endblock %}
+{% block body %}
+    <div class="cont" style="overflow: hidden;">
+    {# style="overflow: hidden;" 用来隐藏滚动条 #}
+			<img src="{% static 'image/pic404.png' %}"/>
+			<br/><br/><br/><br/>
+			<p>wow~这个页面被外星人抢走了~</p>
+			<br/>
+			<span>Wow~ this page was the alien took ~</span>
+		</div>
+{% endblock %}

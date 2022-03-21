@@ -1,0 +1,85 @@
+{% extends 'base_right.html' %}
+{% load blog_tags %}
+{% load highlight %}
+{% load staticfiles %}
+{% block title %}洛 | 文章搜索：{{ query }}{% endblock %}
+{% block body %}
+    <div class="content-wrap">
+        <div class="content">
+            <div>
+                <div class="left-ad" style="clear: both;background-color: #fff; width: 30%;float: left;margin-right:2%;"></div>
+            </div>
+                {% for xarticle in search_list %}
+                <article class="excerpt">
+                    <header>{% for x in xarticle.object.tags.all %}
+                        <a class="label label-important" href="javascript:;">{{x.name}}<i class="label-arrow"></i></a>
+                        {% endfor %}
+                        <!--高亮标题-->
+                        <h2 class="mt-0 font-weight-bold text-info f-17">
+                                <a href="{% url 'blog:article' xarticle.object.slug  %}" target="_blank">{% my_highlight xarticle.object.title query %}</a>
+                        </h2>
+                    </header>
+                    <div class="focus">
+                        <a target="_blank" href="{% url 'blog:article' xarticle.object.slug  %}">
+                            <img class="thumb" width="200" height="123" src="{{xarticle.object.img_link.url}}" alt="{{xarticle.object.title}}">
+                        </a>
+                    </div>
+                    <!--摘要处显示部分文章内容-->
+                    <span class="note">
+                        {% with xarticle.object.body_to_markdown|safe as this_body %}
+    {#                        {% with %}标签可将某个值赋予可用的新变量中，直至遇到{% endwith %}标签#}
+                                <p class="d-none d-sm-block mb-2 f-15">{% highlight this_body with query max_length 300 %}</p>
+                        {% endwith %}
+                    </span>
+                    <p class="auth-span">
+                        <span class="muted">
+                            <i class="fa fa-user"></i>
+                            <a href="{% url 'blog:about' %}">{{xarticle.object.author}}</a>
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-clock-o"></i>
+                            {{xarticle.object.create_time}}
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-eye"></i>
+                            {{xarticle.object.views}}浏览
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-comments-o"></i>
+                            <a target="_blank" href="{% url 'blog:article' xarticle.object.slug  %}#comments">
+                                {{ xarticle.object.comments }}评论
+                            </a>
+                        </span>
+                        <span class="muted">
+                            <a href="javascript:;" data-action="ding" data-id="81,61" id="add_like" class="action">
+                            <i class="fa fa-heart-o"></i>
+                                <span class="count">{{ xarticle.object.loves }}</span>喜欢</a>
+                        </span>
+
+                    </p>
+                </article>
+                {% empty %}
+{#                    循环为空时执行#}
+                    <div class="no-post">未搜索到相关内容！</div>
+                {% endfor %}
+
+                <div class="pagination">
+                {% if is_paginated %}
+                    <div class="text-center mt-2 mt-sm-1 mt-md-0 mb-3 f-16">
+                        {% if page_obj.has_previous %}
+                        <a class="text-success" href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}">上一页</a>
+                        {% else %}
+                        <span class="text-secondary" title="当前页已经是首页">上一页</span>
+                        {% endif %}
+                        <span class="mx-2">第&nbsp;{{ page_obj.number }}&nbsp;/&nbsp;{{ paginator.num_pages }}&nbsp;页</span>
+                        {% if page_obj.has_next %}
+                        <a class="text-success" href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}">下一页</a>
+                        {% else %}
+                        <span class="text-secondary" title="当前页已经是末页">下一页</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                </div>
+        </div>
+    </div>
+{% endblock body %}

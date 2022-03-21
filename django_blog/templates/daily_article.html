@@ -1,0 +1,28 @@
+{% extends 'base_right.html' %}
+{% load staticfiles %}
+{% block title %}洛 | 华洛凰的每日必读{% endblock %}
+{% block body %}
+    <div class="content-wrap">
+        <div class="content">
+            <div>
+                <div class="left-ad" style="clear: both;background-color: #fff; width: 30%;float: left;margin-right:2%;"></div>
+            </div>
+                {% for xarticle in daily_article %}
+                <article class="excerpt">
+                    <header>
+                        <h2><a target="_blank" href="#" title="{{xarticle.title}}">{{xarticle.title}}</a></h2>
+                    </header>
+                    <div class="focus">
+                        <a target="_blank" href="#">
+                            <img class="thumb" width="200" height="123" src="{{xarticle.img_link.url}}" alt="{{xarticle.title}}">
+                        </a>
+                    </div>
+                    <span class="note">{{ xarticle.summary }}</span>
+                </article>
+                {% empty %}
+{#                    循环为空时执行#}
+                    <div class="no-post">当前分类下还没有发布任何文章！</div>
+                {% endfor %}
+        </div>
+    </div>
+{% endblock body %}

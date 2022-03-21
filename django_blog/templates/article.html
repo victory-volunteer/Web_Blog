@@ -1,0 +1,245 @@
+{% extends 'base_right.html' %}
+{% load staticfiles %}
+{% block title %}华洛凰的博文详情{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/github.css' %}">{% endblock %}
+{% block body %}
+<div class="content-wrap">
+        <div class="content">
+            <div class="breadcrumbs">
+                <a title="返回首页" href="{% url 'blog:index' %}"><i class="fa fa-home"></i></a>
+                <small>&gt;</small>
+                <a href="{% url 'blog:category' big_category.slug '' %}">{{big_category.name}}</a>
+                <small>&gt;</small>
+                <a href="{% url 'blog:category' big_category.slug small_category.slug  %}">{{small_category.name}}</a>
+                <small>&gt;</small>
+                <span class="muted">{{ x_article.title }}</span>
+            </div>
+            <header class="article-header">
+                <h1 class="article-title"><a href="{% url 'blog:article' x_article.slug %}">{{ x_article.title }}</a></h1>
+                <div class="meta">
+                    <span id="mute-category" class="muted">
+                        <i class="fa fa-list-alt"></i>
+                        <a href="{% url 'blog:category' big_category.slug small_category.slug  %}"> {{small_category.name}}</a>
+                    </span>
+                    <span class="muted">
+                        <i class="fa fa-user"></i>
+                        <a href="{% url 'blog:about' %}">{{x_article.author}}</a>
+                    </span>
+                    <time class="muted"><i class="fa fa-clock-o"></i> {{x_article.create_time}}</time>
+                    <span class="muted"><i class="fa fa-eye"></i> {{x_article.views}}浏览</span>
+                    <span class="muted">
+                        <a href="javascript:;"  data-id="{{ x_article.id }},{{ x_article.loves }}" id="in_add_like">
+                        <i class="fa fa-heart-o"></i>
+                            <span class="count">{{ x_article.loves }}</span>喜欢</a>
+                    </span>
+                    <span class="muted">
+                        <i class="fa fa-comments-o"></i>
+                        <a href="#respond">{{ x_article.comments }}评论</a>
+                    </span>
+
+                </div>
+            </header>
+                <div id="outerdiv" style="position:fixed;top:0;left:0;background:rgba(0,0,0,0.7);z-index:2;width:100%;height:100%;display:none;">
+                    <div id="innerdiv" style="position:absolute;">
+                        <img id="bigimg" style="border:5px solid #fff;" src="">
+                    </div>
+                </div>
+            </article>
+            <!--赞赏-->
+            <article class="article-content">
+                {{ article_body|safe }}
+                <p>转载请注明：
+                    <a href="{% url 'blog:about' %}">华洛凰</a> &raquo;
+                    <a href="{% url 'blog:article' x_article.slug %}">{{ x_article.title }}</a>
+                </p>
+            </article>
+            <div style="background:#fff;padding-bottom:20px;font-size:14px;">
+                <div class="text-center">
+                    <button class="btn btn-danger rounded-0" style="line-height: 1;font-size: .8rem;" id="support">
+                        <i class="fa fa-cny"></i>
+                        如果文章对你有所帮助，可以赞助本站
+                        <i class="fa fa-chevron-down"></i>
+                    </button>
+                </div>
+                <style>
+                    .p-3 {
+                        padding: 1rem !important;
+                    }
+
+                    .row {
+                        display: -ms-flexbox;
+                        display: flex;
+                        -ms-flex-wrap: wrap;
+                        flex-wrap: wrap;
+                        margin-right: -15px;
+                        margin-left: -15px;
+                    }
+
+                    .col {
+                        -ms-flex-preferred-size: 0;
+                        flex-basis: 0;
+                        -ms-flex-positive: 1;
+                        flex-grow: 1;
+                        max-width: 100%;
+                    }
+
+                    .text-success {
+                        color: #28a745 !important;
+                    }
+
+                    .p-1 {
+                        padding: .25rem !important;
+                    }
+
+                    .w-75 {
+                        width: 75% !important;
+                    }
+
+                    img {
+                        vertical-align: middle;
+                        border-style: none;
+                    }
+
+                    .multi-collapse {
+                        display: none;
+                    }
+
+                    .show {
+                        display: block !important;
+                    }
+                </style>
+                <div class="row p-3">
+                    <div class="col text-center">
+                        <div class="multi-collapse collapse" id="sponsor-wx" style="">
+                            <div class="p-1 text-success">打赏</div>
+                            <img class="w-75" src="{% static 'picture/reward_wx.jpg' %}">
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <div class="multi-collapse collapse" id="sponsor-zfb" style="">
+                            <div class="p-1 text-success">赞赏</div>
+                            <img class="w-75" src="{% static 'picture/sponsor.jpg' %}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <footer class="article-footer">
+                    <!--文章标签-->
+                    <div class="article-tags">
+                        <i class="fa fa-tags"></i>
+                        {% for x_tag in article_tag %}
+                        ..
+                            <a href="javascript:;" rel="tag">{{x_tag.name}}</a>
+                        {% endfor %}
+
+                    </div>
+                    <!--文章标签结束-->
+                </footer>
+                <!--推荐文章-->
+                <nav class="article-nav">
+                    <span class="article-nav-prev">
+                        <i class="fa fa-angle-double-left"></i>
+                        {% if get_article_previous %}
+                            <a href="{% url 'blog:article' get_article_previous.slug  %}" rel="prev">{{get_article_previous.title}}</a>
+                        {% else %}
+                            <a href="javascript:;" rel="prev"></a>
+                        {% endif %}
+                    </span>
+                    <span class="article-nav-next">
+                        <i class="fa fa-angle-double-right"></i>
+                        {% if get_article_next %}
+                            <a href="{% url 'blog:article' get_article_next.slug  %}" rel="prev">{{get_article_next.title}}</a>
+                        {% else %}
+                            <a href="javascript:;" rel="prev"></a>
+                        {% endif %}
+                    </span>
+                </nav>
+
+<div id="respond" class="no_webshot">
+    <div method="post" id="commentform">
+        <div class="comt">
+            <div class="comt-box">
+                <h3>发表我的评论</h3>
+                    <tr>
+                        <td><b>用户昵称：</b><input type="text" name="username01" id="username01" /></td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <td><b>邮箱地址：</b><input type="text" name="email01" id="email01" /></td>
+                    </tr>
+                <div class="card mt-2 rounded-0 border-0" id="comment-block" style="width: 100%!important;">
+                    <div class="card border-0 rounded-0 f-16" id="editor-block" style="width: 100%!important;">
+                        <div class="card-body p-2 p-md-3">
+                            <textarea class="form-control rounded-0" id="comment-form" name="next" placeholder="欢迎小伙伴们前来尬聊" cols="100%" rows="5" required="" style="display: none;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="comt-ctrl">
+                    <button class="btn btn-primary pull-right" id="push-com"  data-ajax-url="{% url 'blog:comment' %}" data-article-id="{{ x_article.id }}" title="欢迎小伙伴们前来尬聊~~~~~" >
+                        <i class="fa fa-check-square-o"></i> 提交评论
+                        <script>
+                            $.ajaxSetup({
+                                data:{csrfmiddlewaretoken:'{{ csrf_token }}'}
+                            })
+                        </script>
+                    </button>
+                    <span data-type="comment-insert-smilie" class="muted comt-smilie" title="如需更多表情请跳转https://www.webfx.com/tools/emoji-cheat-sheet/"><i class="fa fa-smile-o"></i> 表情</span>
+                </div>
+                <div id="comment-smilies" class="hide" style="display: block;">
+                    <img data-simle="smile" data-type="comment-smilie" src="{% static 'picture/icon_smile.gif' %}">
+                    <img data-simle="sob" data-type="comment-smilie" src="{% static 'picture/icon_cry.gif' %}">
+                    <img data-simle="rage" data-type="comment-smilie" src="{% static 'picture/icon_mad.gif' %}">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <div id="postcomments">
+        <div id="postcomments">
+
+
+            <div id="comments">
+                <h1 class="links-title" style="position: relative;padding-left: 10px;margin-bottom: 15px;border-left: 5px solid #E2523A;border-bottom: 1px solid #E2523A;font-size: 16px;font-weight: bold;line-height: 2;color: #545454;">
+                    留言列表(务必填写有效的邮箱地址，否则不会收到回复信息的~)
+                    <span style="position: absolute;right: 0px;bottom:0px;font-size: 14px;font-weight: normal;">共 {{ comment.count }} 条留言</span>
+                </h1>
+            </div>
+            {% if not comment %}
+                <div style="text-align: center">暂时没有评论，欢迎来尬聊！</div>
+            {% else %}
+                {#开#}
+                {% for com in comment %}
+                        <ol class="commentlist">
+                            <li class="comment even thread-even depth-1" id="com-205">
+                                <div class="c-avatar">
+                                    <img alt="注册用户头像" src="{% static 'picture/default.png' %}" class="avatar avatar-54 photo" height="54" width="54" style="border-radius: 50%;">
+                                    <div class="c-main" id="div-comment--21">
+                                        <div style="word-break: break-all; word-wrap: break-word;"><p>
+                                            {{ com.content_to_markdown|safe}}</p></div>
+                                        <div class="c-meta">
+                                            <span class="c-author">
+                                                <a href="" rel="external nofollow" class="url" target="_blank">
+                                                    <strong>{{ com.nickname }}</strong>
+                                                    <a href=""><i class="fa fa-home" title="个人主页"></i></a>
+                                            </span>{{ com.create_date}}
+                                            <a rel="nofollow" class="comment-reply-link rep-btn" href="#editor-block" data-repid="205" data-repuser="{{ com.nickname }}">回复</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ol>
+                {% endfor %}
+            {% endif %}
+                {#完#}
+            <div class="commentnav"></div>
+            <div class="commentnav"></div>
+
+        </div>
+    </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

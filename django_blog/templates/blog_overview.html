@@ -1,0 +1,84 @@
+{% extends 'base_right.html' %}
+{% load staticfiles %}
+{% block title %}洛 | 华洛凰的创作历程{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/main.css' %}">{% endblock %}
+{% block body %}
+    <div class="content-wrap">
+          <div class="content archive">
+            <div class="post-block">
+              <div class="posts-collapse">
+{#                <div class="collection-year">#}
+{#                  <span class="collection-header">2020</span>#}
+{#                </div>#}
+                  {% for article in all_article.object_list%}
+                <article itemscope="" itemtype="http://schema.org/Article">
+                  <header class="post-header">
+                    <div class="post-meta">
+                      <time itemprop="dateCreated" datetime="2020-11-02T01:28:24+08:00" content="2020-11-02"> {{ article.create_time|date:'Y-m-d' }} </time>
+                    </div>
+                    <div class="post-title">
+                      <a class="post-title-link" href="{% url 'blog:article' article.slug  %}" itemprop="url">
+                        <span itemprop="name">{{ article.title}}</span>
+                      </a>
+                    </div>
+                  </header>
+                </article>
+                  {% endfor %}
+              </div>
+            </div>
+            <nav class="pagination">
+            <ul class="pagelist" >
+                {% if all_article.has_previous %}
+                        <li class="long"><a href="?{{ all_article.previous_page_number.querystring }}">上一页</a></li>
+                {% endif %}
+                {% for page in all_article.pages %}
+                    {% if page %}
+                        {% ifequal page all_article.number %}
+                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                        {% else %}
+                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                        {% endifequal %}
+                    {% else %}
+                        <li class="none">...</li>
+                    {% endif %}
+                {% endfor %}
+                {% if all_article.has_next %}
+                    <li class="long"><a href="?{{ all_article.next_page_number.querystring }}">下一页</a></li>
+                {% endif %}
+
+            </ul>
+        </nav>
+          </div>
+          <script>
+            window.addEventListener('tabs:register', () =>
+            {
+              let
+              {
+                activeClass
+              } = CONFIG.comments;
+              if (CONFIG.comments.storage)
+              {
+                activeClass = localStorage.getItem('comments_active') || activeClass;
+              }
+              if (activeClass)
+              {
+                let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+                if (activeTab)
+                {
+                  activeTab.click();
+                }
+              }
+            });
+            if (CONFIG.comments.storage)
+            {
+              window.addEventListener('tabs:click', event =>
+              {
+                if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+                let commentClass = event.target.classList[1];
+                localStorage.setItem('comments_active', commentClass);
+              });
+            }
+
+          </script>
+        </div>
+{% endblock body %}

@@ -1,0 +1,78 @@
+{% extends 'base_right.html' %}
+{% load staticfiles %}
+{% block title %}洛 | 华洛凰的博文分类{% endblock %}
+{% block body %}
+    <div class="content-wrap">
+        <div class="content">
+            <div>
+                <div class="left-ad" style="clear: both;background-color: #fff; width: 30%;float: left;margin-right:2%;"></div>
+            </div>
+                {% for xarticle in all_article.object_list %}
+                <article class="excerpt">
+                    <header>{% for x in xarticle.tags.all %}
+                        <a class="label label-important" href="javascript:;">{{x.name}}<i class="label-arrow"></i></a>
+                        {% endfor %}
+                        <h2><a target="_blank" href="{% url 'blog:article' xarticle.slug  %}" title="{{xarticle.title}}">{{xarticle.title}}</a></h2>
+                    </header>
+                    <div class="focus">
+                        <a target="_blank" href="{% url 'blog:article' xarticle.slug  %}">
+                            <img class="thumb" width="200" height="123" src="{{xarticle.img_link.url}}" alt="{{xarticle.title}}">
+                        </a>
+                    </div>
+                    <span class="note">{{ xarticle.summary }}</span>
+                    <p class="auth-span">
+                        <span class="muted">
+                            <i class="fa fa-user"></i>
+                            <a href="{% url 'blog:about' %}">{{xarticle.author}}</a>
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-clock-o"></i>
+                            {{xarticle.create_time}}
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-eye"></i>
+                            {{xarticle.views}}浏览
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-comments-o"></i>
+                            <a target="_blank" href="{% url 'blog:article' xarticle.slug  %}#comments">
+                                {{ xarticle.comments }}评论
+                            </a>
+                        </span>
+                        <span class="muted">
+                            <a href="javascript:;" data-action="ding" data-id="81,61" id="add_like" class="action">
+                            <i class="fa fa-heart-o"></i>
+                                <span class="count">{{ xarticle.loves }}</span>喜欢</a>
+                        </span>
+
+                    </p>
+                </article>
+                {% empty %}
+{#                    循环为空时执行#}
+                    <div class="no-post">当前分类下还没有发布任何文章！</div>
+                {% endfor %}
+            <div class="pagination">
+            <ul class="pagelist" >
+                {% if all_article.has_previous %}
+                        <li class="long"><a href="?{{ all_article.previous_page_number.querystring }}">上一页</a></li>
+                {% endif %}
+                {% for page in all_article.pages %}
+                    {% if page %}
+                        {% ifequal page all_article.number %}
+                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                        {% else %}
+                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                        {% endifequal %}
+                    {% else %}
+                        <li class="none">...</li>
+                    {% endif %}
+                {% endfor %}
+                {% if all_article.has_next %}
+                    <li class="long"><a href="?{{ all_article.next_page_number.querystring }}">下一页</a></li>
+                {% endif %}
+
+            </ul>
+        </div>
+        </div>
+    </div>
+{% endblock body %}

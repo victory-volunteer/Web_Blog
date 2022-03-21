@@ -1,0 +1,782 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-tc-verification" content="0fb041a64ee71333c957d8c784961cc8">
+    <meta property="qc:admins" content="145637425211673116375">
+    <meta http-equiv="X-UA-Compatible" content="IE=10,IE=9,IE=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <!-- All in One SEO Pack 2.3.12.2.1 by Michael Torbert of Semper Fi Web Design[392,409] -->
+    <meta name="description" content="华洛凰的个人博客，记录生活的瞬间，分享学习的心得，感悟生活">
+
+
+    <meta name="keywords" content="Python,Django,网络,技术,个人博客">
+
+
+    <title>
+
+        {% block title %}
+        {% endblock %}
+    </title>
+    <script>
+        window._deel = {name: '渡', url: '/', ajaxpager: 'on', commenton: 0, roll: [11, 12]}
+        window._deel.commenton = 1
+    </script>
+    <link rel='stylesheet' id='style-css' href='{% static 'css/font-awesome.min.css' %}' type='text/css' media='all'>
+    <link rel="stylesheet" href="{% static 'css/simplemde.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/github.css' %}">
+
+    {% block css %}{% endblock %}
+    <script type='text/javascript' src='{% static 'js/jquery.min-1.0.js' %}'></script>
+{#    <script type='text/javascript' src='https://cuiqingcai.com/wp-content/themes/Yusi/js/jquery.js?ver=1.0'></script>#}
+
+    <script>
+        $(function () {
+            // 还原文章插图
+            $("article").find('img').each(function () {
+                var realWidth = this.width;     //获取图片真实宽度
+                if (realWidth > 780) {
+                    $(this).attr("width", '780');
+                }
+                $(this).click(function () {
+                    var _this = $(this);
+                    imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+                });
+            });
+
+            $("img").find('img').each(function () {
+                $(this).click(function () {
+                    var _this = $(this);//将当前的pimg元素作为_this传入函数
+                    imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+                });
+            });
+            // 点击喜欢
+            $('.muted').delegate("a[id='in_add_like']", "click", function () {
+                if ($(this).hasClass("actived")) {
+                    return alert("已经点过赞啦！")
+                } else {
+                    $(this).addClass("actived");
+                    var z = $(this).data("id"), x = $(this).children(".count");
+                    var article = z.split(',')[0];
+                    var loves = z.split(',')[1];
+                    loves = Number(loves) + 1;
+                    x.html(loves);
+                    $.ajax({
+                        type: "POST",//方法类型
+                        {#headers: {'X-CSRFToken': $.cookie('csrftoken', {expires:2})},#}
+                        url: "{% url 'blog:love' %}",
+                        dataType: "JSON",
+                        data: {"article_id":article, "loves": true},
+                        success: function (data) {
+                            {#alert("点赞成功");#}
+                            console.log(data);
+                        },
+                        beforeSend: function(xhr, settings) {
+                          xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                        },
+                        error: function (data) {
+                            alert("点赞出错");
+                            console.log(data);
+                        }
+                    });
+
+                }
+             })
+            //点击赞赏
+            var flag = true;
+            $('#support').on('click', function () {
+                if (flag) {
+                    $('#sponsor-wx').addClass("show");
+                    $('#sponsor-zfb').addClass("show");
+                    flag = false
+                } else {
+                    $('#sponsor-wx').removeClass('show');
+                    $('#sponsor-zfb').removeClass('show');
+                    flag = true
+                }
+            })
+        });
+
+
+        function imgShow(outerdiv, innerdiv, bigimg, _this) {
+            var src = _this.attr("src");//获取当前点击的pimg元素中的src属性
+            $(bigimg).attr("src", src);//设置#bigimg元素的src属性
+
+            /*获取当前点击图片的真实大小，并显示弹出层及大图*/
+            $("<img/>").attr("src", src).load(function () {
+                var windowW = $(window).width();//获取当前窗口宽度
+                var windowH = $(window).height();//获取当前窗口高度
+                var realWidth = this.width;//获取图片真实宽度
+                var realHeight = this.height;//获取图片真实高度
+                var imgWidth, imgHeight;
+                var scale = 0.8;//缩放尺寸，当图片真实宽度和高度大于窗口宽度和高度时进行缩放
+
+                if (realHeight > windowH * scale) {//判断图片高度
+                    imgHeight = windowH * scale;//如大于窗口高度，图片高度进行缩放
+                    imgWidth = imgHeight / realHeight * realWidth;//等比例缩放宽度
+                    if (imgWidth > windowW * scale) {//如宽度扔大于窗口宽度
+                        imgWidth = windowW * scale;//再对宽度进行缩放
+                    }
+                } else if (realWidth > windowW * scale) {//如图片高度合适，判断图片宽度
+                    imgWidth = windowW * scale;//如大于窗口宽度，图片宽度进行缩放
+                    imgHeight = imgWidth / realWidth * realHeight;//等比例缩放高度
+                } else {//如果图片真实高度和宽度都符合要求，高宽不变
+                    imgWidth = realWidth;
+                    imgHeight = realHeight;
+                }
+                $(bigimg).css("width", imgWidth);//以最终的宽度对图片缩放
+
+                var w = (windowW - imgWidth) / 2;//计算图片与窗口左边距
+                var h = (windowH - imgHeight) / 2;//计算图片与窗口上边距
+                $(innerdiv).css({"top": h, "left": w});//设置#innerdiv的top和left属性
+                $(outerdiv).fadeIn("fast");//淡入显示#outerdiv及.pimg
+            });
+            $(outerdiv).click(function () {//再次点击淡出消失弹出层
+                $(this).fadeOut("fast");
+            });
+        }
+    </script>
+
+    <!-- /all in one seo pack -->
+    <link rel="stylesheet" href="{% static 'css/output.e875214a3225.css' %}" type="text/css"><link rel="stylesheet" href="{% static 'css/output.83a7e8280e53.css' %}" type="text/css" media="all"><link rel="stylesheet" href="{% static 'css/output.6a598ffdd222.css' %}" type="text/css" media="screen, print"><link rel="stylesheet" href="{% static 'css/output.754215d0d32f.css' %}" type="text/css" media="print"><link rel="stylesheet" href="{% static 'css/output.cea50499166a.css' %}" type="text/css" media="all"><link rel="stylesheet" href="{% static 'css/output.af4555336800.css' %}" type="text/css"><link rel="stylesheet" href="{% static 'css/output.de3f3f54226c.css' %}" type="text/css" media="all">
+    <script type="text/javascript" src="{% static 'js/output.214e8822bf81.js' %}"></script>
+    <!--评论区，富文本编辑器-->
+    <meta name="keywords" content="爬虫,Python,C,Java,Django,HTML,GO,教程">
+    <meta name="description" content="华洛凰的个人主页">
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery('.video').fitVids();
+        });
+    </script>
+    <!--百度统计-->
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?8788e0a15b358c68f601e6baf6d75c52";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    <script type="text/javascript"></script>
+    <link rel="shortcut icon" href="{% static 'image/favicon.ico'%}"/>
+	<link rel="bookmark" href="{% static 'image/favicon.ico'%}"/>
+</head>
+
+<body class="home blog">
+<div class="page">
+    <header id="header" class="header">
+        <div class="container-inner">
+            <!--头部-->
+            <div class="yusi-logo">
+                <a href="">
+                    <h1>
+                        <span class="yusi-mono">洛</span>
+                        <span class="yusi-bloger">华洛凰的个人博客</span>
+                    </h1>
+                </a>
+            </div>
+            <!--导航条-->
+            <div id="nav-header" class="navbar">
+                <ul class="nav">
+                    <li id="menu-item-44" class="{% if request.path|slice:'11' == '/blog/index' or request.path|slice:'13' == '/blog/archive' or request.path|slice:'15' == '/blog/tag_cloud' or request.path|slice:'12' == '/blog/search'%}menu-item menu-item-type-custom menu-item-object-custom current-menu-item current_page_item menu-item-home menu-item-44{% endif %}">
+                        <a href="{% url 'blog:index' %}">首页</a></li>
+                    {% for big_category in bigCategory %}
+                        {% if big_category.is_show%}
+                          <li id="menu-item-14" class="menu-item menu-item-type-taxonomy menu-item-object-category {% if big_category.slug == big_slug %}current-menu-item{% endif %} menu-item-has-children menu-item-14">
+                            <a href="{% url 'blog:category' big_category.slug '' %}">{{big_category.name}}</a>
+                            <ul class="sub-menu">
+                            {% for small_category in category %}
+                                {% ifequal small_category.bigcategory_id big_category.id%}
+                                    <li id="menu-item-19" class="menu-item menu-item-type-taxonomy menu-item-object-category {% if small_category.slug == small_slug %}current-menu-item{% endif %} menu-item-19">
+                                        <a href="{% url 'blog:category' big_category.slug small_category.slug  %}">{{small_category.name}}</a></li>
+                                {% endifequal %}
+                            {% endfor %}
+                            </ul>
+                        </li>
+                        <!--无二级分类的一级分类渲染-->
+                        {% else %}
+                        <li id="menu-item-851" class="menu-item menu-item-type-post_type menu-item-object-page {% if big_category.slug == big_slug %}current-menu-item{% endif %} menu-item-851">
+                            <a href="/blog/{{ big_category.slug }}/">{{ big_category.name }}</a></li>
+                            {#这里为了可以使用循环遍历，只能使用href="/blog/{{ big_category.slug }}/"形式#}
+                        {% endif %}
+                    {% endfor %}
+                    <!--导航条结束-->
+{#                    <li class="menu-item menu-item-search">#}
+{#                      <a role="button" class="popup-trigger">搜索 </a>#}
+{#                    </li>#}
+{#                    <!--搜索框-->#}
+{#                    <li style="float:right;">#}
+{#                        <div class="toggle-search"><i class="fa fa-search"></i></div>#}
+{#                        <div class="search-expand" style="display: none;">#}
+                            <div class="search-expand-inner">
+                                <form class="nav-item navbar-form mr-2 py-md-2" role="search" method="get" id="searchform" action="{% url 'blog:search_view' %}">
+                                    <div class="input-group">
+                                        <input type="search" name="q" class="form-control rounded-0 f-15" placeholder="搜索" >
+                                        <div class="input-group-btn" style="float:right;">
+                                            <button class="btn btn-info rounded-0" type="submit"><i class="fa fa-search"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+{#                        </div>#}
+{#                    </li>#}
+{#                    搜索框结束#}
+                </ul>
+            </div>
+            <!--导航条结束-->
+        </div>
+    </header>
+    <section class="container">
+        <div class="speedbar" id="speedbar">
+            <!--登录-->
+{#            <!--目前登录功能只有注册登录其它没必要没做-->#}
+<div class="pull-right" id="pull-login">
+{#        <i class="fa fa-power-off"></i>#}
+{#        <a data-toggle="modal" data-target="#login">登录</a>#}
+{#        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <i class="fa fa-user-plus"></i>#}
+{#        <a data-toggle="modal" data-target="#register">注册</a>#}
+    <script type="text/javascript">
+    function login() {
+        $.ajax({
+            type: "POST",//方法类型
+            url: "/account/login/",//url
+            dataType: "HTML",
+            data: $('#login-form').serialize(),
+            success: function (data) {
+                try {
+                    var result = JSON.parse(data);
+                    if (result.ok == '1') {
+                        window.location.reload()  //刷新页面
+                    }else if (result.inactive){
+                        $("#pull-login").html(data);
+                    }
+                    else {
+                        $("#pull-login").html(data);
+                    }
+                } catch (e) {
+                    $("#pull-login").html(data);
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
+
+<div class=" modal fade " id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden=" true " style="display: none">
+    <div class="modal-dialog" style="width:550px;">
+        <div class="modal-content">
+            <!--  模态框的头 -->
+            <div class="modal-header" style="background-color:#ffffff;">
+
+                    <button class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                <h2 class="modal-title" id="myModalLabel" align="center">登录</h2>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff;">
+                <!--   以下是登录的form表单 -->
+                <form class="form-horizontal" role="form" name="f" id="login-form" method="POST">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='eW1lDzvRh6l5f1X9MdiA28BYGHPgNmQdF4UrrGs4vIfzMWqcquv0TF8hNrluCG3G'>
+
+                    <div class="form-group" id="div1">
+                        <label for="firstname" class="col-sm-2 control-label">用户名：</label>
+                        <div class="col-sm-10" id="user">
+                            <input type="text" class="form-control" id="username" placeholder="请输入用户名" style="width:300px" name="username" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6——8位的字母或数字任意组合" data-trigger="focus" autofocus="autofocus" value="" required="">
+                            <label id="n" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <div class="form-group " id="div2">
+                        <label for="lastname" class="col-sm-2 control-label">密 码：</label>
+                        <div class="col-sm-10" id="pd">
+                            <input type="password" class="form-control" id="l_pwd" placeholder="请输入密码" style="width: 300px" name="password" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6位密码" data-trigger="focus" autofocus="autofocus" value="" required="">
+                            <label id="p" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="remember">请记住我
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="fun" value="login">
+                    <a class="secondaryAction" data-toggle="modal" data-dismiss="modal" aria-hidden="true" data-target="#forget">忘记密码了？</a>
+                    <div class="login-title">
+                        <span><a data-toggle="modal" data-dismiss="modal" aria-hidden="true" data-target="#register">还没账号？去注册</a></span>
+                    </div>
+                    <a class="pull-right btn btn-info btn-sm rounded-0" onclick="login()">登录</a>
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color:#ffffff;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function register() {
+        check_user_name();
+        check_pwd();
+        check_pwd2();
+        //check_email();
+        $.ajax({
+            type: "POST",//方法类型
+            url: "/account/register/",//url
+            dataType: "JSON",
+            data: $('#register-form').serialize(),
+            success: function (result) {
+                try {
+                    if (result.error) {
+                        if (result.e) {
+                            console.log(result.e);
+                            $('#re_email').next().html('验证码有误，请重新获取验证码')
+                        }
+                        if (result.n) {
+                            $('#re_username').next().html('用户名已经存在')
+                        }
+                    }
+                    else {
+                        if (result.active == false) {
+                            $('#error').html("请登录注册邮箱，激活你的账号，" +
+                                "如果不激活可能部分功能无法对你开放，如果长时间未收到激活账号的邮件" +
+                                "你可以选择去个人中心重新发送激活邮件")
+                        } else {
+                            window.location.reload()
+                        }
+                    }
+                } catch (e) {
+                    $('#error').text("注册失败")
+                }
+            },
+            error: function (data) {
+                console.log(data)
+            }
+        });
+    }
+
+    function check_user_name() {
+        var len = $('#re_username').val().length;
+        if (len < 5 || len > 20) {
+            $('#re_username').next().html('请输入5-20个字符的用户名');
+            $('#re_username').next().show();
+            error_name = true;
+        }
+    }
+
+    function check_pwd() {
+        var len = $('#pwd').val().length;
+        if (len < 8 || len > 20) {
+            $('#pwd').next().html('密码最少8位，最长20位')
+            $('#pwd').next().show();
+            error_password = true;
+        }
+        else {
+            $('#pwd').next().hide();
+            error_password = false;
+        }
+    }
+
+    function check_pwd2() {
+        var pass = $('#pwd').val();
+        var pass2 = $('#pwd2').val();
+
+        if (pass != pass2) {
+            $('#pwd2').next().html('两次输入的密码不一致');
+            $('#pwd2').next().show();
+            error_check_password = true;
+        }
+        else {
+            $('#pwd2').next().hide();
+            error_check_password = false;
+        }
+    }
+
+    function check_email() {
+        var re = /^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$/;
+
+        if (re.test($('#re_email').val())) {
+            $('#re_email').next().hide();
+            error_email = false;
+        }
+        else {
+            $('#re_email').next().html('你输入的邮箱格式不正确')
+            $('#re_email').next().show();
+            error_email = true;
+        }
+
+    }
+</script>
+
+<div class=" modal fade " id="register" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden=" true " style="display: none">
+    <div class="modal-dialog" style="width:550px;">
+        <div class="modal-content">
+            <!--  模态框的头 -->
+            <div class="modal-header" style="background-color:#ffffff;">
+
+                    <button class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                <h2 class="modal-title" id="myModalLabel" align="center">注册</h2>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff;">
+                <!--   以下是登录的form表单 -->
+                <form class="form-horizontal" role="form" name="f" id="register-form" method="POST">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='eW1lDzvRh6l5f1X9MdiA28BYGHPgNmQdF4UrrGs4vIfzMWqcquv0TF8hNrluCG3G'>
+                    <div class="form-group" id="div1">
+                        <label for="firstname" class="col-sm-2 control-label">用户名：</label>
+                        <div class="col-sm-10" id="user">
+                            <input type="text" class="form-control" id="re_username" placeholder="请输入名字" style="width:300px" name="username" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6——8位的字母或数字任意组合" data-trigger="focus">
+                            <label id="n" style="color: red;"></label>
+                        </div>
+
+                    </div>
+                    <div class="form-group" id="div3">
+                        <div class="form-inline">
+                            <label for="firstname" class="form-inline" title="关注微信公众号[华洛凰的日常],后台回复[注册]获取验证码">验证码：</label>
+                             <a class="weixin">
+                            <i class="fa fa-wechat" style="color: green"></i>
+                            <div class="weixin-popover">
+                                <div class="popover bottom in">
+                                    <div class="arrow"></div>
+                                    <div class="popover-title"></div>
+                                    <div class="popover-content"><img src="{% static 'picture/weixin.jpg' %}"></div>
+                                </div>
+                            </div>
+                        </a>
+                        </div>
+                        <div class="col-sm-10" id="email">
+                            <input type="text" class="form-control" id="re_email" placeholder="请输入验证码" style="width:300px" name="email" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="关注微信公众号[华洛凰的日常],后台回复[注册]获取验证码" data-trigger="focus">
+                            <label id="e" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <div class="form-group " id="div2">
+                        <label for="lastname" class="col-sm-2 control-label">密 码：</label>
+                        <div class="col-sm-10" id="pd">
+                            <input type="password" class="form-control" id="pwd" placeholder="请输入密码" style="width: 300px" name="password" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6位密码" data-trigger="focus">
+                            <label id="p" style="color: red;">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group " id="div2">
+                        <label for="lastname" class="col-sm-2 control-label">确 认 密 码：</label>
+                        <div class="col-sm-10" id="pd">
+                            <input type="password" class="form-control" id="pwd2" placeholder="请输入密码" style="width: 300px" name="password2" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6位密码" data-trigger="focus">
+                            <label id="p" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="fun" value="register">
+                    <div class="login-title">
+                        <span><a data-toggle="modal" data-dismiss="modal" aria-hidden="true" data-target="#login">已经有账号了？去登录</a></span>
+                    </div>
+                    <label style="color: red" id="error"></label>
+                    <a class="pull-right btn btn-info btn-sm rounded-0" onclick="register()">注册</a>
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color:#ffffff;">
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script type="text/javascript">
+    function forget() {
+        $.ajax({
+            type: "POST",//方法类型
+            url: "/",//url
+            dataType: "HTML",
+            data: $('#forget-form').serialize(),
+            success: function (data) {
+                try {
+                    var result = JSON.parse(data);
+                    if (result.ok == '1') {
+                        window.location.reload()  //刷新页面
+                    } else {
+                        $("#pull-login").html(data);
+                    }
+                } catch (e) {
+                    $("#pull-login").html(data);
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
+
+<div class=" modal fade " id="forget" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden=" true " style="display: none">
+    <div class="modal-dialog" style="width:550px;">
+        <div class="modal-content">
+            <!--  模态框的头 -->
+            <div class="modal-header" style="background-color:#ffffff;">
+
+                    <button class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+                <h2 class="modal-title" id="myModalLabel" align="center">重置密码</h2>
+            </div>
+            <div class="modal-body" style="background-color:#ffffff;">
+                <!--   以下是登录的form表单 -->
+                <form class="form-horizontal" role="form" name="f" id="forget-form" method="POST">
+                    <input type='hidden' name='csrfmiddlewaretoken' value='eW1lDzvRh6l5f1X9MdiA28BYGHPgNmQdF4UrrGs4vIfzMWqcquv0TF8hNrluCG3G'>
+
+
+                    <div class="form-group" id="div1">
+                        <label for="firstname" class="col-sm-2 control-label">用户名：</label>
+                        <div class="col-sm-10" id="user">
+                            <input type="text" class="form-control" id="f_username" placeholder="请输入名字" style="width:300px" name="username" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入6——8位的字母或数字任意组合" data-trigger="focus">
+                            <label id="n" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="div3">
+                        <label for="firstname" class="col-sm-2 control-label">邮箱：</label>
+                        <div class="col-sm-10" id="email">
+                            <input type="text" class="form-control" id="f_email" placeholder="请输入名字" style="width:300px" name="eamil" class="tooltip-test" data-toggle="tooltip" data-placement="bottom" title="请输入邮箱" data-trigger="focus">
+                            <label id="n" style="color: red;"></label>
+                        </div>
+                    </div>
+                    <input type="hidden" name="fun" value="forget">
+                    <label style="color: red">由于网站升级，暂时停用</label>
+                    <a class="pull-right btn btn-info btn-sm rounded-0" disabled="disabled">重置密码</a>
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color:#ffffff;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+            <!--登录注册结束-->
+            <!--公告 此处只显示一个最新的公告，以后添加一个专门的公告页面-->
+            <div class="toptip"><strong class="text-success"><i class="fa fa-volume-up"></i> </strong><font size="0.7">{{ notice.text }}</font>
+{#                本站基于Django开发，源码 <a href="javascript:;" target="_blank">Github</a> 欢迎 Fork、Star。由于站点升级导致评论区留言信息丢失，欢迎前来发表新的评论#}
+            </div>no
+            <!--公告结束-->
+        </div>
+
+        <!--右侧内容区-->
+    {% block body %}{% endblock body %}
+
+        <!--左侧内容区结束-->
+        <!--右侧信息标签 广告区-->
+    {% block right %}{% endblock %}
+
+    </section>
+    <!--网站底部-->
+    <footer class="footer" style="flex: 0 0 auto;">
+        <div class="footer-inner">
+            <div class="copyright pull-left">
+                <a href="{% url 'blog:about' %}" title="洛">华洛凰</a> 版权所有丨
+{#                <a href="javascript:;"> 欲思 </a>主题丨#}
+                <a href="https://docs.djangoproject.com/zh-hans/2.2/" title="Django" target="_blank">基于Django构建</a>© 2020丨托管于
+                <a rel="nofollow" target="_blank" href="javascript:;" title="阿里云主机" target="_blank">xx主机</a>
+                &
+                <a rel="nofollow" target="_blank" href="javascript:;">xx存储 </a>丨
+{#                <a href="sitemap.xml" title="Sitemap" target="_blank">Sitemap</a> |#}
+                <a href="{% url 'sitemap' %}" title="Sitemap" target="_blank">Sitemap</a> |
+                <a href="https://beian.miit.gov.cn/#/Integrated/index" title="Sitemap" target="_blank"> 待申请</a>
+{#                <div>#}
+{#                    <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1276375952'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s96.cnzz.com/z_stat.php%3Fid%3D1276375952%26online%3D1' type='text/javascript'%3E%3C/script%3E"));</script>#}
+{#                </div>#}
+            </div>
+        </div>
+    </footer>
+</div>
+<!--网站底部结束-->
+<!--侧边栏跟随-->
+<script type="text/javascript">
+    SidebarFollow = function () {
+        this.config = {
+            element: null, // 处理的节点
+            compare: null,
+            distanceToTop: 0, // 节点上边到页面顶部的距离
+            _distanceRight: 0
+        };
+        this.cache = {
+            originalToTop: 0, // 原本到页面顶部的距离
+            prevElement: null, // 上一个节点
+            parentToTop: 0, // 父节点的上边到顶部距离
+            placeholder: document.createElement('div') // 占位节点
+        }
+    };
+    SidebarFollow.prototype = {
+        init: function (config) {
+            this.config = config || this.config;
+            var _self = this;
+            var element = document.getElementById(_self.config.element);
+            // 如果没有找到节点, 不进行处理
+            if (!element) {
+                return;
+            }
+            // 获取上一个节点
+            var _prevElement = _self._getPrevElement(element);
+            var prevElement = _self._getPrevElement(_prevElement);
+            while (prevElement.offsetHeight < 0) {
+                prevElement = _self._getPrevElement(prevElement);
+                if (!prevElement) {
+                    break;
+                }
+            }
+            _self.cache.prevElement = prevElement;
+            // 计算父节点的上边到顶部距离
+            var parent = element.parentNode;
+            var parentToTop = _self._getCumulativeOffset(parent).top;
+            var parentBorderTop = parseInt(parent.style.borderTop, 10);
+            var parentPaddingTop = parseInt(parent.style.paddingTop, 10);
+            _self.cache.parentToTop = parentToTop + parentBorderTop + parentPaddingTop;
+            // 滚动屏幕
+            var speed_bar = document.getElementById(_self.config.compare);
+            _self.config._distanceRight = document.body.clientWidth - _self._getCumulativeOffset(element).right;
+            element.style.position = 'static';
+            if (_self.config._distanceRight < 0) {
+                element.style.right = 0 - _self.config._distanceRight + 'px';
+            } else {
+                element.style.right = _self.config._distanceRight + 'px';
+            }
+            _self._addListener(window, 'scroll', function () {
+                _self._scrollScreen({element: element, speed_bar: speed_bar, prevElement: prevElement, _self: _self});
+            });
+            // 改变屏幕尺寸
+            _self._addListener(window, 'resize', function () {
+                _self._scrollScreen({element: element, speed_bar: speed_bar, prevElement: prevElement, _self: _self});
+            });
+        },
+        _scrollScreen: function (args) {
+            var _self = args._self;
+            var element = args.element;
+            var speed_bar = args.speed_bar;
+            var prevElement = args.prevElement;
+            var toTop = _self.config.distanceToTop;
+            var parentToBottom = _self._getCumulativeOffset(element).bottom;
+            // 如果 body 有 top 属性, 消除这些位移
+            var bodyToTop = parseInt(document.getElementsByTagName('body')[0].style.top, 10);
+            if (!isNaN(bodyToTop)) {
+                toTop += bodyToTop;
+            }
+            var elementToTop = 0;
+            if (element.style.position === 'fixed') {
+                elementToTop = _self._getScrollY();
+            } else {
+                elementToTop = _self._getCumulativeOffset(element).top - toTop;
+            }
+            var elementToPrev = _self._getCumulativeOffset(prevElement).top + _self._getVisibleSize(prevElement).height;
+            // 当节点进入跟随区域, 跟随滚动
+            var distanceRight = document.body.clientWidth - _self._getCumulativeOffset(speed_bar).right;
+            if (distanceRight != _self.config._distanceRight || distanceRight < 0) {
+                if (distanceRight < 0) {
+                    element.style.right = -distanceRight + 'px';
+                } else {
+                    element.style.right = distanceRight + 'px';
+                }
+            }
+            if (_self._getScrollY() > elementToTop + parentToBottom) {
+                // 添加占位节点
+                var elementHeight = _self._getVisibleSize(element).height;
+                _self.cache.placeholder.style.height = elementHeight + 'px';
+                element.parentNode.insertBefore(_self.cache.placeholder, element);
+                // 记录原位置
+                _self.cache.originalToTop = elementToTop;
+                // 修改样式
+                element.style.bottom = 0;
+                element.style.position = 'fixed';
+
+                element.style.right = distanceRight + 'px';
+                // 否则回到原位
+            } else if (_self.cache.originalToTop > elementToTop || elementToPrev > elementToTop) {
+                var parent = _self.cache.placeholder.parentNode;
+                if (parent) {
+                    // 删除占位节点
+                    parent.removeChild(_self.cache.placeholder);
+                    // 修改样式
+                    element.style.position = 'static';
+                }
+            }
+        },
+        _getCumulativeOffset: function (element) {
+            var rect = element.getBoundingClientRect();
+            var offset = {
+                left: 0,
+                top: 0,
+                right: rect.right - document.documentElement.clientLeft,
+                bottom: rect.bottom - document.documentElement.clientTop
+            };
+            do {
+                offset.left += element.offsetLeft || 0;
+                offset.top += element.offsetTop || 0;
+                element = element.offsetParent;
+            } while (element);
+            return offset;
+        },
+
+        _getVisibleSize: function (element) {
+            var dimension = {
+                width: 0,
+                height: 0
+            };
+            dimension.width = element.offsetWidth;
+            dimension.height = element.offsetHeight;
+            return dimension;
+        },
+
+        _getScrollY: function () {
+            if (typeof window.pageYOffset != 'undefined') {
+                return window.pageYOffset;
+            }
+            if (typeof document.compatMode != 'undefined' && document.compatMode != 'BackCompat') {
+
+                return document.documentElement.scrollTop;
+            }
+            return document.body.scrollTop;
+        },
+
+        _addListener: function (node, type, listener) {
+            if (node.addEventListener) {
+                node.addEventListener(type, listener, false);
+                return true;
+            } else if (node.attachEvent) {
+                node['e' + type + listener] = listener;
+                node[type + listener] = function () {
+                    node['e' + type + listener](window.event);
+                };
+                node.attachEvent('on' + type, node[type + listener]);
+                return true;
+            }
+            return false;
+        },
+
+        _getPrevElement: function (element) {
+            var prev = element.previousSibling;
+            while (prev.nodeType !== 1) {
+                prev = prev.previousSibling;
+            }
+            return prev;
+        }
+    };
+</script>
+<script>
+    (new SidebarFollow()).init({
+        element: 'sidebar',
+        compare: 'speedbar',
+        distanceToTop: 0
+    });
+</script>
+<script>
+    window.onload = function () {
+        var readMore = document.getElementById('btn-readmore');
+        var hideArticleBox = document.getElementById('hide-article-box');
+        var content = document.getElementById('entry-content');
+        readMore.onclick = function () {
+            content.style.height = 'auto';
+            hideArticleBox.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
+

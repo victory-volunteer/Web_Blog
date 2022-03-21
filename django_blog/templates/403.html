@@ -1,0 +1,16 @@
+{% extends 'base_mistake.html' %}
+{% load staticfiles %}
+{% block title %}403{% endblock %}
+{% block class_name %}bg403 errorpage{% endblock %}
+{% block body %}
+    <div class="cont">
+			<div class="fl error_cut"><img src="{% static 'image/pic403.png' %}"/></div>
+			<div class="fr error_cut">
+				<img src="{% static 'image/word403.png' %}"/>
+				<h1>没有访问权限！</h1>
+				<br/><br/><br/><br/><br/><br/>
+				<p>请求被拒！</p>
+				<p>您可以尝试<span class="red">【重新加载此页面】</span></p>
+			</div>
+		</div>
+{% endblock %}

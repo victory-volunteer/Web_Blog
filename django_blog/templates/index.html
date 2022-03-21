@@ -1,0 +1,116 @@
+{% extends 'base_right.html' %}
+{% load staticfiles %}
+{% block title %}洛 | 华洛凰的个人站点{% endblock %}
+{% block body %}
+    <div class="content-wrap">
+        <div class="content">
+            <div id="wowslider-container1">
+                <div class="ws_images">
+                    <ul>
+                        {% for x_rotation in rotation %}
+                            {% if not x_rotation.is_hot %}
+                            <li>
+                                <a target="_blank" href="{{x_rotation.url}}" title="{{x_rotation.title}}">
+                                    <img src="{{x_rotation.img_link.url}}" title="{{x_rotation.title}}" alt="{{x_rotation.title}}">
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="ws_thumbs">
+                    <div>
+                        {% for x_rotation in rotation %}
+                            <a target="_blank" href="{{x_rotation.url}}" title="{{x_rotation.title}}"><img src="{{x_rotation.img_link.url}}"></a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="ws_shadow"></div>
+                <script type="text/javascript" src="{% static 'js/slider.js' %}"></script>
+            </div>
+            <div>
+                <div class="left-ad" style="clear: both;background-color: #fff; width: 30%;float: left;margin-right:2%;"></div>
+                <div class="hot-posts">
+                    <h2 class="title">热门排行</h2>
+                    {% for xhot_article in hot_article %}
+                    <ul>
+                            <li>
+                                <p>
+                                    <span class="muted">
+                            <i class="fa fa-eye"></i>
+                            {{xhot_article.views}}浏览
+                        </span>
+                                </p>
+                                <span class="label label-1">{{forloop.counter}}</span>
+                                <a href="{% url 'blog:article' xhot_article.slug  %}" title="{{xhot_article.title}}" style="">{{xhot_article.title}}</a>
+                            </li>
+                    </ul>
+                    {% endfor %}
+                </div>
+            </div>
+                {% for xarticle in all_article.object_list %}
+                <article class="excerpt">
+                    <header>{% for x in xarticle.tags.all %}
+                        <a class="label label-important" href="javascript:;">{{x.name}}<i class="label-arrow"></i></a>
+                        {% endfor %}
+                        <h2><a target="_blank" href="{% url 'blog:article' xarticle.slug  %}" title="{{xarticle.title}}">{{xarticle.title}}</a></h2>
+                    </header>
+                    <div class="focus">
+                        <a target="_blank" href="{% url 'blog:article' xarticle.slug  %}">
+                            <img class="thumb" width="200" height="123" src="{{xarticle.img_link.url}}" alt="{{xarticle.title}}">
+                        </a>
+                    </div>
+                    <span class="note">{{ xarticle.summary }}</span>
+                    <p class="auth-span">
+                        <span class="muted">
+                            <i class="fa fa-user"></i>
+                            <a href="{% url 'blog:about' %}">{{xarticle.author}}</a>
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-clock-o"></i>
+                            {{xarticle.create_time}}
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-eye"></i>
+                            {{xarticle.views}}浏览
+                        </span>
+                        <span class="muted">
+                            <i class="fa fa-comments-o"></i>
+                            <a target="_blank" href="{% url 'blog:article' xarticle.slug  %}#respond">
+                                {{ xarticle.comments }}评论
+                            </a>
+                        </span>
+                        <span class="muted">
+                            <a href="javascript:;" data-action="ding" data-id="81,61" id="add_like" class="action">
+                            <i class="fa fa-heart-o"></i>
+                                <span class="count">{{ xarticle.loves }}</span>喜欢</a>
+                        </span>
+
+                    </p>
+                </article>
+                {% endfor %}
+            <div class="pagination">
+            <ul class="pagelist" >
+                {% if all_article.has_previous %}
+                        <li class="long"><a href="?{{ all_article.previous_page_number.querystring }}">上一页</a></li>
+                {% endif %}
+                {% for page in all_article.pages %}
+                    {% if page %}
+                        {% ifequal page all_article.number %}
+                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                        {% else %}
+                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                        {% endifequal %}
+                    {% else %}
+                        <li class="none">...</li>
+                    {% endif %}
+                {% endfor %}
+                {% if all_article.has_next %}
+                    <li class="long"><a href="?{{ all_article.next_page_number.querystring }}">下一页</a></li>
+                {% endif %}
+
+            </ul>
+        </div>
+        </div>
+    </div>
+{% endblock body %}
